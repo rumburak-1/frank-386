@@ -510,6 +510,16 @@ if(USB_HID_ENABLED)
         # master is not something to attempt blind.
         message(STATUS "USB HID enabled: console on UART0 (J2, GPIO0/1)")
         pico_enable_stdio_uart(${BUILD_NAME} 1)
+    elseif(BOARD STREQUAL "Z2")
+        # Z2 uses GPIO0/1 for the PS/2 mouse, so move the console to the
+        # Pi-header TXD/RXD pins: GPIO14 TX (pin 8), GPIO15 RX (pin 10),
+        # 115200 8N1. RP2350 reaches UART0 there via the UART_AUX funcsel.
+        message(STATUS "USB HID enabled: console on UART0 (GPIO14 TX, GPIO15 RX)")
+        pico_enable_stdio_uart(${BUILD_NAME} 1)
+        target_compile_definitions(${BUILD_NAME} PRIVATE
+            PICO_DEFAULT_UART_TX_PIN=14
+            PICO_DEFAULT_UART_RX_PIN=15
+        )
     else()
         # Other boards route GPIO0/1 to PS/2 or a gamepad, so there is no
         # UART to fall back on — stdio is simply off.
